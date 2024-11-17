@@ -2,7 +2,7 @@
     "title": "Drazev's Gamemaster Toolkit",
     "id": "drazevs-gm-toolkit",
     "esmodules": [
-      "src/init.js"
+      "src/init/init.mjs"
     ],
     "styles": [],
     "languages": [

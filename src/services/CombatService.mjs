@@ -1,3 +1,4 @@
+import {MODULE_ID} from "../constants.mjs"
 /**
  * Combat Service 
  * 
@@ -24,6 +25,8 @@
  * @property {string} The combat id that acted in this combat record
  */
 
+
+
 export default class CombatService {
 
     constructor() {
@@ -32,10 +35,10 @@ export default class CombatService {
         }
 
         CombatService._instance = this;
-        Hooks.on("combatStart",this.onCombatStart);
-        Hooks.on("combatTurn",this.onCombatTurn);
-        Hooks.on("combatRound",this.onCombatRound);
-        Hooks.on("combatTurnChange",this.onCombatTurnChange);
+        Hooks.on("combatStart",this.onCombatStart.bind(this));
+        Hooks.on("combatTurnChange",this.onCombatTurnChange.bind(this));
+        Hooks.on("combatTurn",this.onCombatTurn.bind(this));
+        Hooks.on("combatRound",this.onCombatRound.bind(this));
     }
 
     /**
@@ -53,6 +56,8 @@ export default class CombatService {
     /**
      * A hook event that fires when the turn of the Combat encounter changes. This event fires on the initiating client before any database update occurs. combatTurn
      * 
+     *  Use this to modify data prior to update
+     * 
      * @param {Combat} combat The Combat encounter which is advancing or rewinding its turn
      * @param {UpdateData} updateData An object which contains Combat properties that will be updated. Can be mutated.
      * @param {UpdateOptions} updateOptions An object which contains options provided to the update method. Can be mutated.
@@ -62,10 +67,13 @@ export default class CombatService {
         console.log(combat)
         console.log(updateData)
         console.log(updateOptions)
+
     }
 
     /**
      * Handles a hook event that fires when the round of the Combat encounter changes. This event fires on the initiating client before any database update occurs. combatRound
+     * 
+     * Use this to modify data prior to update
      * 
      * @param {Combat} combat The Combat encounter which is advancing or rewinding its turn
      * @param {UpdateData} updateData An object which contains Combat properties that will be updated. Can be mutated.
@@ -80,6 +88,9 @@ export default class CombatService {
     
     /**
      * Handles a hook event which fires when the turn order of a Combat encounter is progressed. This event fires on all clients after the database update has occurred for the Combat.
+     * 
+     * This should be used to react to turn changes.
+     * 
      * @param {Combat} combat The Combat encounter for which the turn order has changed
      * @param {CombatHistoryData} prior The prior turn state
      * @param {CombatHistoryData} current The new turn state
@@ -89,6 +100,7 @@ export default class CombatService {
         console.log(combat)
         console.log(prior)
         console.log(current)
+
     }
 
 }

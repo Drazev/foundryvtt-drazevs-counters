@@ -1,4 +1,5 @@
 import CombatService from "../services/CombatService.mjs";
+import TargetService from "../services/TargetService.mjs";
 
 const services = new Map();
 
@@ -8,4 +9,5 @@ Hooks.once("init",() => {
 
 Hooks.once("ready",()=> {
     services.set("CombatService",new CombatService());
+    services.set("TargetService",new TargetService());
 });
