@@ -1,0 +1,54 @@
+{
+    "title": "Drazev's Gamemaster Toolkit",
+    "id": "drazevs-gm-toolkit",
+    "esmodules": [
+      "src/init.js"
+    ],
+    "styles": [],
+    "languages": [
+      {
+        "lang": "en",
+        "name": "English",
+        "path": "lang/en.json"
+      }
+    ],
+    "packs": [],
+    "packFolders": [],
+    "documentTypes": {
+    },
+    "externals": [],
+    "compatibility": {
+      "minimum": 12,
+      "verified": 12
+    },
+    "relationships": {
+      "systems": [],
+      "modules": []
+    },
+    "description": "This is a set of tools designed by Drazev to improve the quality of life of Gamemaster's in the Foundry VTT system.",
+    "version": "0.1.0",
+    "authors": [
+      {
+        "name": "Jayson Mendoza (Drazev)",
+        "url": "https://www.jkmconsulting.ca",
+        "discord": "drazev"
+      }
+    ],
+    "url": "https://github.com/Drazev/foundryvtt-drazevs-counters",
+    "persistentStorage": false,
+    "socket": false,
+    "manifest": "",
+    "download": "",
+    "flags": {
+      "hotReload": {
+        "extensions": [
+          "css",
+          "html",
+          "hbs",
+          "json",
+          "js",
+          "mjs"
+        ]
+      }
+    }
+  }

@@ -1,0 +1,2 @@
+#  Typedefs
+This folder contains the shared definitions of types that are external to this module, or data only structures used internally which do not have any associated class. It uses JS Doc standards.
