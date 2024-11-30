@@ -4,7 +4,7 @@ const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api
  * [ApplicationV2 API]{@link https://foundryvtt.com/api/v12/classes/foundry.applications.api.ApplicationV2.html}
  */
 
-export default class TestApp extends HandlebarsApplicationMixin(ApplicationV2) {
+export default class CombatCardSheet extends HandlebarsApplicationMixin(ApplicationV2) {
     
     //Instance of Foundryvtt Type [ApplicationConfiguration]{@link https://foundryvtt.com/api/v12/interfaces/foundry.applications.types.ApplicationConfiguration.html}
     static DEFAULT_OPTIONS = {
@@ -32,6 +32,7 @@ export default class TestApp extends HandlebarsApplicationMixin(ApplicationV2) {
      */
     constructor() {
         super();
+        this.actor = null;
         this.data = {
             "title" : "My title",
             "text" : "my text is here!",
@@ -39,6 +40,96 @@ export default class TestApp extends HandlebarsApplicationMixin(ApplicationV2) {
         }
 
     }
+
+    async getData(options) {
+        const context = await this.actor.sheet.getData(options);
+        const { attributes, resources } = this.actor.system;
+        context.encumbrance = attributes.encumbrance;
+    
+        // Ability Scores
+        Object.entries(context.abilities).forEach(([k, ability]) => {
+          ability.key = k;
+          ability.abbr = CONFIG.DND5E.abilities[k]?.abbreviation ?? "";
+          ability.baseValue = context.source.abilities[k]?.value ?? 0;
+          ability.icon = CONFIG.DND5E.abilities[k]?.icon;
+        });
+    
+        // Show Death Saves
+        context.showDeathSaves = !foundry.utils.isEmpty(this.actor.classes)
+          || this.actor.getFlag("dnd5e", "showDeathSaves");
+    
+        // Speed
+        context.speed = Object.entries(CONFIG.DND5E.movementTypes).reduce((obj, [k, label]) => {
+          const value = attributes.movement[k];
+          if ( value ) {
+            obj[k] = { label, value };
+            if ( (k === "fly") && attributes.movement.hover ) obj.fly.icons = [{
+              icon: "fas fa-cloud", label: game.i18n.localize("DND5E.MovementHover")
+            }];
+          }
+          return obj;
+        }, {});
+    
+        // Skills & Tools
+        const skillSetting = new Set(game.settings.get("dnd5e", "defaultSkills"));
+        context.skills = Object.fromEntries(Object.entries(context.skills).filter(([k, v]) => {
+          return v.value || skillSetting.has(k) || v.bonuses.check || v.bonuses.passive;
+        }));
+    
+        // Senses
+        if ( this.actor.system.skills.prc ) {
+          context.senses.passivePerception = {
+            label: game.i18n.localize("DND5E.PassivePerception"), value: this.actor.system.skills.prc.passive
+          };
+        }
+    
+        // Legendary Actions & Resistances
+        const plurals = new Intl.PluralRules(game.i18n.lang, { type: "ordinal" });
+        ["legact", "legres"].forEach(res => {
+          const { max, value } = resources[res];
+          context[res] = Array.fromRange(max, 1).map(n => {
+            const i18n = res === "legact" ? "LegAct" : "LegRes";
+            const filled = value >= n;
+            const classes = ["pip"];
+            if ( filled ) classes.push("filled");
+            return {
+              n, filled,
+              tooltip: `DND5E.${i18n}`,
+              label: game.i18n.format(`DND5E.${i18n}N.${plurals.select(n)}`, { n }),
+              classes: classes.join(" ")
+            };
+          });
+        });
+        context.hasLegendaries = resources.legact.max || resources.legres.max || resources.lair.initiative;
+    
+        // Spellcasting
+        this._prepareSpellcasting(context);
+    
+        // Biographies
+        const enrichmentOptions = {
+          secrets: this.actor.isOwner, relativeTo: this.actor, rollData: context.rollData
+        };
+    
+        context.enriched = {
+          public: await TextEditor.enrichHTML(this.actor.system.details.biography.public, enrichmentOptions),
+          value: context.biographyHTML
+        };
+    
+        if ( this.editingDescriptionTarget ) {
+          context.editingDescriptionTarget = this.editingDescriptionTarget;
+          context.enriched.editing = this.editingDescriptionTarget.endsWith("public")
+            ? context.enriched.public
+            : context.enriched.value;
+        }
+    
+        return context;
+    }
+
+    async _render(force=false, options={}) {
+        await super._render(force, options);
+        const [warnings] = this.element.find(".pseudo-header-button.preparation-warnings");
+        warnings?.toggleAttribute("hidden", !this.actor._preparationWarnings?.length);
+        }
 
 
 
