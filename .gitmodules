@@ -1,0 +1,6 @@
+[submodule "dnd5e"]
+	path = dnd5e
+	url = git@github.com:foundryvtt/dnd5e.git
+[submodule "foundryvtt-simple-calendar"]
+	path = foundryvtt-simple-calendar
+	url = git@github.com:vigoren/foundryvtt-simple-calendar.git
